@@ -1,0 +1,16 @@
+[package]
+name = "progression"
+description = "Minimalistic and fast Rust progress bar"
+version = "0.1.10"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/yuryshulaev/progression"
+keywords = ["cli", "progress", "progressbar"]
+categories = ["command-line-interface"]
+
+[features]
+default = ["num-format", "terminal_size"]
+
+[dependencies]
+num-format = { version = "0.4.4", optional = true }
+terminal_size = { version = "0.2.3", optional = true }
