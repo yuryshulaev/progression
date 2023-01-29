@@ -1,6 +1,6 @@
 # progression
 
-Minimalistic (155 SLOC) and fast (updates are throttled) Rust progress bar.
+Minimalistic (157 SLOC) and fast (updates are throttled) Rust progress bar.
 
 ```
  00:00:05   475 / 1,000 [##########################                          ]  48% ETA 00:00:06

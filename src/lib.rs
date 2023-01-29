@@ -25,6 +25,7 @@ pub struct Config<'a> {
 	pub style: Style,
 	pub space_char: char,
 	pub prefix: &'a str,
+	pub unit: &'a str,
 	pub num_width: usize,
 	pub throttle_millis: u64,
 }
@@ -55,6 +56,7 @@ impl Default for Config<'_> {
 			style: Style::Mono('#'),
 			space_char: ' ',
 			prefix: "",
+			unit: "",
 			num_width: 0,
 			throttle_millis: 10,
 		}
@@ -93,7 +95,8 @@ impl<'a> Bar<'a> {
 		config.num_width = config.num_width.max(len_str.len());
 		#[cfg(feature = "terminal_size")]
 		{ config.width = config.width.or_else(|| Some(u64::from(terminal_size::terminal_size()?.0.0))) }
-		let bar_width = config.width.unwrap_or(config.default_width) - 35 - (config.prefix.len() as u64) - (config.num_width as u64) * 2;
+		let bar_width = config.width.unwrap_or(config.default_width) - 35 - (config.prefix.len() + config.unit.len() + config.num_width * 2) as u64
+			- if config.unit.is_empty() { 0 } else { 1 };
 		Self { config, bar_width, len, pos: AtomicU64::new(0), len_str, start_time: Instant::now(), last_update: AtomicU64::new(0) }
 	}
 
@@ -106,8 +109,8 @@ impl<'a> Bar<'a> {
 		let secs_per_step = self.start_time.elapsed().as_secs_f64() / (pos as f64);
 		let eta = Time(((self.len.saturating_sub(pos) as f64) * secs_per_step).ceil() as u64);
 
-		write!(stderr, "\r{} {} {:>num_width$} / {:>num_width$} {}", self.config.prefix, Time(self.start_time.elapsed().as_secs()),
-			format_number(pos), self.len_str, self.config.delimiters.0, num_width = self.config.num_width)?;
+		write!(stderr, "\r{} {} {:>num_width$} / {:>num_width$}{}{} {}", self.config.prefix, Time(self.start_time.elapsed().as_secs()), format_number(pos),
+			self.len_str, if self.config.unit.is_empty() { "" } else { " " }, self.config.unit, self.config.delimiters.0, num_width = self.config.num_width)?;
 		write_iter(&mut stderr, std::iter::repeat(self.config.style.bar_char()).take(progress_width as usize))?;
 		write!(stderr, "{}", if pos == self.len { self.config.style.bar_char() } else { self.config.style.edge_char() })?;
 		write_iter(&mut stderr, std::iter::repeat(self.config.space_char).take((self.bar_width - progress_width) as usize))?;
