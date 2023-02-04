@@ -3,6 +3,7 @@ use std::{io::{stderr, Write}, fmt::Display, time::Instant, sync::atomic::{Atomi
 #[cfg(feature = "num-format")]
 use num_format::{Locale, ToFormattedString, ToFormattedStr};
 
+#[derive(Clone)]
 pub enum Style {
 	Mono(char),
 	Edged(char, char),
@@ -18,6 +19,7 @@ impl Style {
 	}
 }
 
+#[derive(Clone)]
 pub struct Config<'a> {
 	pub width: Option<u64>,
 	pub default_width: u64,
@@ -69,13 +71,9 @@ pub fn bar<I: ExactSizeIterator>(iter: I) -> impl Iterator<Item = I::Item> {
 }
 
 #[inline]
-pub fn bar_with_config<I: ExactSizeIterator>(iter: I, config: Config) -> std::iter::Map<I, impl FnMut(I::Item) -> I::Item + '_> {
-	let bar = Bar::new(iter.size_hint().0.try_into().unwrap(), config);
-
-	iter.map(move |x| {
-		bar.inc(1);
-		x
-	})
+pub fn bar_with_config<I: ExactSizeIterator>(iter: I, config: Config) -> std::iter::Inspect<I, impl FnMut(&I::Item) + '_> {
+	let bar = Bar::new(iter.len().try_into().unwrap(), config);
+	iter.inspect(move |_| bar.inc(1))
 }
 
 pub struct Bar<'a> {
