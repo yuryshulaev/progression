@@ -1,6 +1,6 @@
 # progression
 
-Minimalistic (157 SLOC) and fast (updates are throttled) Rust progress bar.
+Minimalistic (174 SLOC) and fast (updates are throttled) Rust progress bar.
 
 ```
  00:00:05   475 / 1,000 [##########################                          ]  48% ETA 00:00:06
@@ -36,6 +36,11 @@ fn main() {
 
     // Unicode style
     for _ in progression::bar_with_config(0..1_000, progression::Config::unicode()) {
+        thread::sleep(Duration::from_millis(1));
+    }
+
+    // Uses `slice.chunks` internally for lower overhead on large numbers of items
+    for _ in progression::bar_chunks(10, &[0; 1_000]) {
         thread::sleep(Duration::from_millis(1));
     }
 

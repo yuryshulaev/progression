@@ -76,6 +76,28 @@ pub fn bar_with_config<I: ExactSizeIterator>(iter: I, config: Config) -> std::it
 	iter.inspect(move |_| bar.inc(1))
 }
 
+#[inline]
+pub fn bar_chunks<T>(chunk_size: usize, slice: &[T]) -> impl Iterator<Item = &T> {
+	bar_chunks_with_config(chunk_size, slice, Config::default())
+}
+
+#[inline]
+pub fn bar_chunks_with_config<'b, 'a: 'b, T>(chunk_size: usize, slice: &'a [T], config: Config<'b>) -> impl Iterator<Item = &'a T> + 'b {
+	let bar = Bar::new(slice.len().try_into().unwrap(), config);
+	slice.chunks(chunk_size).inspect(move |chunk| bar.inc(chunk.len() as u64)).flatten()
+}
+
+#[inline]
+pub fn bar_chunks_mut<T>(chunk_size: usize, slice: &mut [T]) -> impl Iterator<Item = &mut T> {
+	bar_chunks_mut_with_config(chunk_size, slice, Config::default())
+}
+
+#[inline]
+pub fn bar_chunks_mut_with_config<'b, 'a: 'b, T>(chunk_size: usize, slice: &'a mut [T], config: Config<'b>) -> impl Iterator<Item = &'a mut T> + 'b {
+	let bar = Bar::new(slice.len().try_into().unwrap(), config);
+	slice.chunks_mut(chunk_size).inspect(move |chunk| bar.inc(chunk.len() as u64)).flatten()
+}
+
 pub struct Bar<'a> {
 	config: Config<'a>,
 	len: u64,

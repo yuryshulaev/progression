@@ -16,6 +16,11 @@ fn main() {
 		thread::sleep(Duration::from_millis(1));
 	}
 
+	// Uses `slice.chunks` internally for lower overhead on large numbers of items
+	for _ in progression::bar_chunks(10, &[0; 1_000]) {
+		thread::sleep(Duration::from_millis(1));
+	}
+
 	// Custom
 	for _ in progression::bar_with_config(0..1_000, progression::Config { style: progression::Style::Mono('·'), ..Default::default() }) {
 		thread::sleep(Duration::from_millis(1));
